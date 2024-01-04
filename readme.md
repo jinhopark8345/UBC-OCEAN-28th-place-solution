@@ -4,12 +4,11 @@
 
 # My Approach
 - TMA : center crop and tiling and inference with TMA model 
-- WSI : first classify tumor area with WSI model and make further classify subtypes with TMA model
+- WSI : first classify tumor area with WSI model and classify sub-types with TMA model
 
 # TMA pipelne detail
 - Train
     - extract tiles from WSI images with supplemental masks
-
 - Inference
     - cropped and resized TMA tiles (extract tiles from TMA images with 2048x2048 resolution, and resize them to 512x512, stride 256, zoom : x40->x10)
     - inference with TMA model -> each tile with predicted ovarian sub type
