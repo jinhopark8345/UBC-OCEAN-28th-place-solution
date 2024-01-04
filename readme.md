@@ -1,13 +1,12 @@
-
 # EDA
 - TMA resolution x40, WSI resolution x20 (10000x10000 ~ 100000x100000 resolution)
 - we have only 25 TMA images with about 3000x3000 ~ 4000x4000 resolution
 
-# Approach
+# My Approach
 - TMA : center crop and tiling and inference with TMA model 
 - WSI : first classify tumor area with WSI model and make further classify subtypes with TMA model
 
-### TMA pipelne detail
+# TMA pipelne detail
 - Train
     - extract tiles from WSI images with supplemental masks
 
@@ -16,7 +15,7 @@
     - inference with TMA model -> each tile with predicted ovarian sub type
     - majority votes and make final prediction
 
-### WSI pipeline detail
+# WSI pipeline detail
 - Train
     - Tumor classifier : TMA model but with WSI thumbnails and compressed WSI supplemental masks
     - TMA model : used the same TMA model from TMA pipeline
@@ -27,13 +26,18 @@
         - no tumor tiles -> 'Other'
         - tumor tiles -> center crop and pass it to TMA model and do majority votes and make final prediction
 
-# Preprocessing & data prep
+# Reproduce Steps 
 - 1. download images from https://www.kaggle.com/competitions/UBC-OCEAN/data
 - 2. download supplemental masks from https://www.kaggle.com/datasets/sohier/ubc-ovarian-cancer-competition-supplemental-masks
+(for TMA pipeline)
 - 3. extract tiles from WSI from 1,2 data ->  v1 data (e.g. now we have "train_tiles_based_on_mask_1024x1024")
 - 4. train first phase tma model with v1 data
 - 5. extract more tiles from rest of the WSI images (WSI images without supplemental masks) -> v2 data
 - 6. further train TMA model with v2 data
+
+(for WSI pipeline)
+- 7. extract thumbnail tiles from WSI from 1,2 data ->  v3 data 
+- 8. train tumor classifier with v3 data
 
 # Train
 
