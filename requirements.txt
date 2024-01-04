@@ -1,0 +1,15 @@
+torch
+pytorch_lightning
+transformers
+
+torchvision
+opencv-contrib-python
+
+tqdm
+numpy
+seaborn
+albumentations
+timm
+pyvips
+
+tensorboard

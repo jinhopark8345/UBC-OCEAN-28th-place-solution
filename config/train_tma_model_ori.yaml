@@ -1,0 +1,60 @@
+debug: False
+result_path: "workspace"
+exp_name: "tma_predict_model"
+seed: 2023
+
+model:
+    name: "maxvit_tiny_tf_512.in1k"
+    pretrained: True
+    checkpoint_path: null
+    precision: "16-mixed" # should i change? to fp16?
+    input_image_size: [512, 512] # [height, width]
+    num_classes: 6
+
+data:
+    train:
+      - {dataset_name: mask_tiles, csv_path: /kaggle/input/train_tiles_based_on_mask_1024x1024_pseudo/train_red_thr_0.70_other_thr_0.90_other_cut_thr_0.02.csv}
+      - {dataset_name: other_tiles, csv_path: /kaggle/input/tma_pseudo_label_other_tma_images/train.csv}
+    merge_train_datasets: True
+    valid:
+      - {dataset_name: val_set_3, csv_path: /kaggle/input/train_tiles_based_on_mask_1024x1024_pseudo/val_set3.csv}
+      - {dataset_name: tma_tiles2, csv_path: /kaggle/input/tma_tiles_valid_set/train_2560_2048_512_256.csv}
+      - {dataset_name: tma_tiles2_by_image_id_tumor_only, csv_path: /kaggle/input/tma_tiles_valid_set/train_2560_2048_512_256.csv}
+      - {dataset_name: tma_tiles4, csv_path: /kaggle/input/tma_tiles_valid_set/train_3072_2048_512_256.csv}
+      - {dataset_name: tma_tiles4_by_image_id_tumor_only, csv_path: /kaggle/input/tma_tiles_valid_set/train_3072_2048_512_256.csv}
+      - {dataset_name: tma_tiles, csv_path: /kaggle/input/UBC-OCEAN-tma-tiles/train_with_image_id.csv}
+      - {dataset_name: tma_tiles_by_image_id_tumor_only, csv_path: /kaggle/input/UBC-OCEAN-tma-tiles/train_with_image_id.csv}
+      - {dataset_name: tma_tiles3, csv_path: /kaggle/input/tma_tiles_valid_set/train_2816_2048_512_256.csv}
+      - {dataset_name: tma_tiles3_by_image_id, csv_path: /kaggle/input/tma_tiles_valid_set/train_2816_2048_512_256.csv}
+    original_csv_path: /kaggle/input/UBC-OCEAN/train.csv
+
+    labels: ["CC", "EC", "HGSC", "LGSC", "MC", "Other"]
+    create_new_fold: False
+    save_dataframe: True
+    n_fold: 20
+    fold: 0
+
+train:
+    accelerator: "cuda"
+    train_batch_size: 24
+    val_batch_size: 120
+    num_workers: 8
+    max_epochs: 100
+    val_check_interval: 1.0
+    check_val_every_n_epoch: 3
+    clip_gradient_algorithm: "norm"
+    clip_gradient_value: 1.0
+    gradient_clip_val: 1.0
+
+    num_samples_per_epoch: 100000
+
+
+optimizer:
+    method: "Adamw"
+    params:
+        lr: 5e-4
+        # weight_decay: 1e-8
+    lr_schedule:
+        method: "linear"
+        params:
+            warmup_steps: 0

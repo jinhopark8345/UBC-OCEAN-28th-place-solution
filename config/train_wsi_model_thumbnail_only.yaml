@@ -1,0 +1,53 @@
+debug: False
+result_path: "workspace"
+exp_name: "wsi_predict_model"
+seed: 2023
+
+model:
+    name: "maxvit_tiny_tf_512.in1k"
+    pretrained: True
+    checkpoint_path: null
+    # precision: null
+    precision: "16-mixed" # should i change? to fp16?
+    # Allowed precision values: ('transformer-engine', 'transformer-engine-float16', '16-true', '16-mixed', 'bf16-true', 'bf16-mixed', '32-true', '64-true', 64, 32, 16, '64', '32', '16', 'bf16')
+    input_image_size: [512, 512] # [height, width]
+    num_classes: 6
+
+data:
+    train_csv:
+      - "/kaggle/input/UBC-OCEAN-wsi-thumbnails/train.csv"
+    valid_csv:
+      - "/kaggle/input/UBC-OCEAN-wsi-thumbnails/train.csv"
+
+    labels: ["CC", "EC", "HGSC", "LGSC", "MC", "Other"]
+    label_encoder_bin: "/kaggle/working/UBC-OCEAN-model_ckpts/workspace/encoder/label_encoder.pkl"
+    # create_new_fold: True
+    save_dataframe: True
+    n_fold: 10
+    fold: 0
+
+train:
+    accelerator: "cuda"
+    train_batch_size: 10
+    val_batch_size: 24
+    num_workers: 8
+    max_epochs: 30
+    # max_epochs: 100
+    val_check_interval: 1.0
+    check_val_every_n_epoch: 3
+    clip_gradient_algorithm: "norm"
+    clip_gradient_value: 1.0
+    gradient_clip_val: 1.0
+
+    num_samples_per_epoch: 100000
+
+
+optimizer:
+    method: "Adamw"
+    params:
+        lr: 5e-5
+        # weight_decay: 1e-8
+    lr_schedule:
+        method: "linear"
+        params:
+            warmup_steps: 0

@@ -1,0 +1,49 @@
+debug: False
+result_path: "workspace"
+exp_name: "tma_predict_model"
+seed: 2023
+
+model:
+    name: "maxvit_tiny_tf_512.in1k"
+    pretrained: True
+    checkpoint_path: "/kaggle/working/UBC-OCEAN-model_ckpts/workspace/train_tma_model_val_tma_only/20231203_013021_continue_from_20231129_181656_linear_adamw_with_halfmoon_aug/ckpts/maxvit_tiny_tf_512.in1k-tile-epoch=06-val_acc=0.7700.ckpt"
+    precision: "16-mixed" # should i change? to fp16?
+    input_image_size: [512, 512] # [height, width]
+    num_classes: 6
+
+data:
+    train_csv:
+      # - "/kaggle/input/UBC-OCEAN-masked_filtered_tiles-1024px-scale-0-50/train.csv" # don't use this if you want to use same validation set
+      - "/kaggle/input/UBC-OCEAN-masked_filtered_tiles-1024px-scale-0-50/train_20fold.csv" # to use same validation set
+      - "/kaggle/input/UBC-OCEAN-wsi-tiles_without_mask_selected_from_maxvit_tiny_with_other/train.csv"
+    valid_csv:
+      - "/kaggle/input/UBC-OCEAN-tma-tiles/train.csv"
+
+    labels: ["CC", "EC", "HGSC", "LGSC", "MC", "Other"]
+    create_new_fold: False
+    save_dataframe: True
+    n_fold: 20
+    fold: 0
+
+train:
+    accelerator: "cuda"
+    train_batch_size: 24
+    val_batch_size: 100
+    num_workers: 8
+    max_epochs: 100
+    val_check_interval: 0.3
+    check_val_every_n_epoch: 3
+    clip_gradient_algorithm: "norm"
+    clip_gradient_value: 1.0
+    gradient_clip_val: 1.0
+    num_samples_per_epoch: 100000
+
+
+optimizer:
+    method: "Adamw"
+    params:
+        lr: 2e-5
+    lr_schedule:
+        method: "linear"
+        params:
+            warmup_steps: 100

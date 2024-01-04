@@ -1,0 +1,54 @@
+debug: False
+result_path: "workspace"
+exp_name: "tma_predict_model"
+seed: 2023
+
+model:
+    name: "maxvit_tiny_tf_512.in1k"
+    pretrained: True
+    checkpoint_path: "/kaggle/working/UBC-OCEAN-model_ckpts/workspace/train_tma_model_additional_wsi_tiles_with_other_after_tumor_classifier_v2/20231206_012742/ckpts/maxvit_tiny_tf_512.in1k-epoch=03-step=118884-val_acc=0.9536.ckpt"
+    precision: "16-mixed" # should i change? to fp16?
+    input_image_size: [512, 512] # [height, width]
+    num_classes: 6
+
+data:
+    train:
+      - {dataset_name: mask_tiles, csv_path: /kaggle/input/UBC-OCEAN-masked_filtered_tiles-1024px-scale-0-50/train_20fold.csv}
+      - {dataset_name: tc_tiles, csv_path: /kaggle/input/UBC-OCEAN-wsi-tiles_without_mask_selected_from_ensembled_tumor_classifier/train_tma_5_discard_applied_with_image_id.csv}
+    merge_train_datasets: True
+
+    valid:
+      - {dataset_name: tma_tiles, csv_path: /kaggle/input/UBC-OCEAN-tma-tiles/train_with_image_id.csv}
+      - {dataset_name: tma_tiles_by_image_id, csv_path: /kaggle/input/UBC-OCEAN-tma-tiles/train_with_image_id.csv}
+      - {dataset_name: wsi_val1_by_image_id_tumor_only, csv_path: /kaggle/input/UBC-OCEAN-wsi_validation_dataset_v1/train.csv}
+      # - {dataset_name: wsi_val2_by_image_id_tumor_only, csv_path: /kaggle/input/UBC-OCEAN-wsi_validation_dataset_v2/train.csv}
+      - {dataset_name: wsi_val3_by_image_id_tumor_only, csv_path: /kaggle/input/UBC-OCEAN-wsi_validation_dataset_v3/train.csv}
+
+    original_csv_path: /kaggle/input/UBC-OCEAN/train.csv
+
+    labels: ["CC", "EC", "HGSC", "LGSC", "MC", "Other"]
+    save_dataframe: True
+    n_fold: 20
+    fold: 0
+
+train:
+    accelerator: "cuda"
+    train_batch_size: 24
+    val_batch_size: 180 # 100
+    num_workers: 8
+    max_epochs: 100
+    val_check_interval: 0.25
+    check_val_every_n_epoch: 3
+    clip_gradient_algorithm: "norm"
+    clip_gradient_value: 1.0
+    gradient_clip_val: 1.0
+
+
+optimizer:
+    method: "Adamw"
+    params:
+        lr: 2.8e-5
+    lr_schedule:
+        method: "linear"
+        params:
+            warmup_steps: 1000
